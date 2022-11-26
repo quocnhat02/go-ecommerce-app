@@ -3,11 +3,9 @@ const userRouter = require('./routes/user');
 
 const app = express();
 
-app.use('/api/v1/', userRouter);
+app.use(express.json());
 
-app.get('/about', (req, res) => {
-  res.send('<h1>Hello I am from you backend about</h1>');
-});
+app.use('/api/v1/user', userRouter);
 
 app.listen(8000, () => {
   console.log('The port is listening on 8000');
