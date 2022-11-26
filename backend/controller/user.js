@@ -1,6 +1,8 @@
 const nodemailer = require('nodemailer');
 const User = require('../models/user');
 const EmailVerificationToken = require('../models/emailVerificationToken');
+const { isValidObjectId } = require('mongoose');
+const user = require('../models/user');
 
 const createUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -54,6 +56,30 @@ const createUser = async (req, res) => {
     message:
       'Please verify your email. OTP has been sent to your email account!',
   });
+};
+
+const verifyEmail = async (req, res) => {
+  const { userId, OTP } = req.body;
+
+  if (!isValidObjectId(userId)) {
+    return res.json({ error: 'Invalid user!' });
+  }
+
+  user = await User.findById(userId);
+
+  if (!user) {
+    return res.json({ error: 'User not found!' });
+  }
+
+  if (user.isVerified) {
+    return res.json({ error: 'User is already verified!' });
+  }
+
+  const token = await EmailVerificationToken.findOne({ owner: userId });
+
+  if (!token) {
+    return res.json({ error: 'token not found!' });
+  }
 };
 
 module.exports = {
