@@ -13,7 +13,7 @@ const createUser = async (req, res) => {
 
   await newUser.save();
 
-  res.status(201).json({ user: newUser });
+  return res.status(201).json({ user: newUser });
 };
 
 module.exports = {
