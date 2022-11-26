@@ -1,10 +1,9 @@
 const express = require('express');
+const userRouter = require('./routes/user');
 
 const app = express();
 
-app.get('/', (req, res) => {
-  res.send('<h1>Hello I am from you backend server</h1>');
-});
+app.use('/api/v1/', userRouter);
 
 app.get('/about', (req, res) => {
   res.send('<h1>Hello I am from you backend about</h1>');
