@@ -65,7 +65,7 @@ const verifyEmail = async (req, res) => {
     return res.json({ error: 'Invalid user!' });
   }
 
-  user = await User.findById(userId);
+  const user = await User.findById(userId);
 
   if (!user) {
     return res.json({ error: 'User not found!' });
@@ -112,7 +112,72 @@ const verifyEmail = async (req, res) => {
   return res.json({ message: 'Your email is verified.' });
 };
 
+const resendEmailVerificationToken = async (req, res) => {
+  const { userId } = req.body;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return res.json({ error: 'User not found!' });
+  }
+
+  if (user.isVerified) {
+    return res.json({ error: 'This email id is already verified!' });
+  }
+
+  const alreadyHasToken = await EmailVerificationToken.findOne({
+    owner: userId,
+  });
+
+  if (alreadyHasToken) {
+    return res.json({
+      error: 'Only after one hour you can request for another token!',
+    });
+  }
+
+  // generate 6 digit otp
+  let OTP = '';
+  for (let i = 0; i <= 5; i++) {
+    const randomVal = Math.round(Math.random() * 9);
+    OTP += randomVal;
+  }
+
+  // store otp inside our db
+  const newEmailVerificationToken = new EmailVerificationToken({
+    owner: newUser._id,
+    token: OTP,
+  });
+
+  await newEmailVerificationToken.save();
+
+  // send that otp to our user
+  var transport = nodemailer.createTransport({
+    host: 'smtp.mailtrap.io',
+    port: 2525,
+    auth: {
+      user: 'c3f26a6c41ad28',
+      pass: '8f44ef30c2649f',
+    },
+  });
+
+  transport.sendMail({
+    from: 'verification@reviewapp.com',
+    to: newUser.email,
+    subject: 'Email Verification',
+    html: `
+      <p>Your verification OTP</p>
+      <h1>${OTP}</h1>
+    `,
+  });
+
+  return res.status(201).json({
+    message:
+      'Please verify your email. OTP has been sent to your email account!',
+  });
+};
+
 module.exports = {
   createUser,
   verifyEmail,
+  resendEmailVerificationToken,
 };
