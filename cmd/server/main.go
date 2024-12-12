@@ -1,13 +1,8 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import "github.com/quocnhat02/go-ecommerce-app/internal/routers"
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-	r.Run()
+	r := routers.NewRouter()
+	r.Run(":8002")
 }
